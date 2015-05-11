@@ -90,11 +90,6 @@ shinyServer(function(input, output) {
                                    )   
                             })
     
-    output$debug <- renderTable({
-      
-      fred.final() %>% as.data.frame
-      
-    })
     
 ######################
     # The next function takes the final time series and scales it
