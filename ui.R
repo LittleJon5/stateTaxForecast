@@ -9,7 +9,7 @@ shinyUI(fluidPage(
 # ------------------------- This loads the css file for apps style
   includeCSS("styles.css"),
   
-  titlePanel(h1("US Macroeconomic Situation and Forecast")),
+  titlePanel(h1("State Government Revenue Forecasts")),
   
   sidebarLayout(
     sidebarPanel(
@@ -39,13 +39,7 @@ shinyUI(fluidPage(
       selectInput("manipulate", label = h4("Transformations"),
                   choices = c("No Transformation",
                               "Change",
-                              "Change From a Year Ago",
-                              "Percent Change",
-                              "Percent Change from a Year Ago",
-                              "Compounded Annual Rate of Change",
-                              "Continuously Compounded Rate of Change",
-                              "Countinuously Compounded Annual Rate of Change",
-                              "Natural Log"),
+                              "Percent Change"),
                   selected = "No Transformation"),
       
       selectInput("scalefactor", 
@@ -54,22 +48,22 @@ shinyUI(fluidPage(
                     "Thousands" = 1000,
                     "Millions" = 1000000,
                     "Billions" = 1000000000),
-                  selected = "No change"),
+                  selected = "Billions"),
       
       sliderInput("smooth",
                   label = h4("Smoothing Parameter"),
-                  min=.05,
-                  max=.5,
-                  value= .21,
+                  min=.30,
+                  max=.75,
+                  value= .51,
                   animate = TRUE),
       
       numericInput("horizon", 
                    label = h4("Forecast Horizon"), 
-                   value = 12), 
+                   value = 2), 
       
       dateInput("date", 
                 label = h4("Initial Date (YYYY-MM-DD)"), 
-                value = "1959-01-01")
+                value = "1994-01-01")
     ),
     
     

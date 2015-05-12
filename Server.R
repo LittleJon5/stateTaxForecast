@@ -80,13 +80,7 @@ shinyServer(function(input, output) {
                             switch(input$manipulate,
                                    "No Transformation" = fred.data(),
                                    "Change" = fred.data() %>% chg,
-                                   "Change From a Year Ago" = fred.data() %>% ch1(n_obs_per_year = fred.compound()),
                                    "Percent Change" = fred.data() %>% pch,
-                                   "Percent Change from a Year Ago" = fred.data() %>% pc1(n_obs_per_year = fred.compound()),
-                                   "Compounded Annual Rate of Change" = fred.data() %>% pca(n_obs_per_year = fred.compound()),
-                                   "Continuously Compounded Rate of Change" = fred.data() %>% cch,
-                                   "Countinuously Compounded Annual Rate of Change" = fred.data() %>% cca(n_obs_per_year = fred.compound()),
-                                   "Natural Log" = fred.data() %>% log
                                    )   
                             })
     
@@ -147,7 +141,7 @@ shinyServer(function(input, output) {
 #       forecast.df <- forecast.frame(ets.forecast())
 #       forecast.df
       
-      ets.forecast() %>% as.data.frame
+      forecast.frame(ets.forecast(), fred.final(), input$horizon)
       
     })
     
@@ -163,9 +157,18 @@ shinyServer(function(input, output) {
            When this message disappears your forecast is on its way.")
     )
      
-    forecast.df <- forecast.plot.frame(ets.forecast())
- 
-    plot.data <- past.data(ets.forecast())
+    
+    forecast.df <- forecast.plot.frame(ets.forecast(), fred.final(), input$horizon)
+    
+                                              
+     
+    if(input$manipulate == "Percent Change") {
+            
+       plot.data <- past.data(ets.data = ets.forecast(),  fred.data = fred.final(), out.length = length(fred.final()), startSpot = 2)
+                                            
+    } else {
+      plot.data <- past.data(ets.data = ets.forecast(), fred.data = fred.final(), out.length = length(fred.final()))
+      }
     
     ggforecast(plot.data, forecast.df, input$smooth, input$date)
     

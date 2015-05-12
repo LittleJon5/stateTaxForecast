@@ -77,24 +77,14 @@ ggforecast <- function(past, future, span.val, input.date){
 # as.character portion of the first item in the data frame is left off
 ###########################
 
-forecast.frame <- function(ets.data){
-  framed <- data.frame(as.character(as.Date(time(ets.data$mean))),
-                      ets.data$mean,
-                      ets.data$lower[,2],
-                      ets.data$lower[, 1],
-                      ets.data$upper[, 1],
-                      ets.data$upper[, 2])
-  names(framed) <- c('time', 'forecast', 'lower95', 'lower80', 
-                     'upper80', 'upper95')
-  return(framed)
-}
-
-######################
-# This version is idea for getting the data into a plotable form.
-######################
-
-forecast.plot.frame <- function(ets.data){
-  framed <- data.frame(as.Date(time(ets.data$mean)),
+forecast.frame <- function(ets.data, fred.data, out.length){
+  
+  
+  startDate <- as.Date(time(fred.data)[length(fred.data)])
+  
+  dates <- seq.Date(from = startDate, by = "year", length.out = out.length + 1 )
+  
+  framed <- data.frame(as.character(dates[2: (out.length + 1)]),
                        ets.data$mean,
                        ets.data$lower[,2],
                        ets.data$lower[, 1],
@@ -105,6 +95,29 @@ forecast.plot.frame <- function(ets.data){
   return(framed)
 }
 
+######################
+# This version is idea for getting the data into a plotable form.
+######################
+
+forecast.plot.frame <- function(ets.data, fred.data, out.length){
+  
+  startDate <- as.Date(time(fred.data)[length(fred.data)])
+  
+  dates <- seq.Date(from = startDate, by = "year", length.out = out.length + 1 )
+  
+  framed <- data.frame(dates[2:(out.length + 1 )],
+                       ets.data$mean,
+                       ets.data$lower[,2],
+                       ets.data$lower[, 1],
+                       ets.data$upper[, 1],
+                       ets.data$upper[, 2]) 
+  names(framed) <- c('time', 'forecast', 'lower95', 'lower80', 
+                     'upper80', 'upper95')
+  return(framed)
+}
+
+
+
 #####
 # This function is like the one before but it assembles
 # a plot for the observed data used in the forecast
@@ -112,13 +125,17 @@ forecast.plot.frame <- function(ets.data){
 # to use the ggforecast function.
 #####
 
-past.data <- function(ets.data){
+past.data <- function(ets.data, fred.data, out.length = length(fred.data), startSpot = 1){
+ 
+   startDate <- as.Date(time(fred.data)[1])
   
-  plot.data <- data.frame(as.Date(time(ets.data$x)),
-                  ets.data$x,
-                  ets.data$fitted)
+  dates <- seq.Date(from = startDate, by = "year", length.out = out.length)[startSpot:length(fred.data)]
   
-  names(plot.data) <- c("time", "values", "fitted")
+  
+  plot.data <- data.frame(dates,
+                  ets.data$x)
+  
+  names(plot.data) <- c("time", "values")
   
   return(plot.data)
 }
