@@ -54,8 +54,12 @@ shinyServer(function(input, output) {
     #######################
     
     fred.data <- reactive({
-                            fredSeries(indicator.complete(), from = input$date) %>%
-                              applySeries(by = "monthly", FUN = mean)
+      
+                          temp <-  fredSeries(indicator.complete(), from = input$date) / as.numeric(input$scalefactor)
+                          
+                          ts(series(temp), start = year(start(temp)), frequency = frequency(temp))
+        
+                           
                           })
     
     
@@ -80,10 +84,12 @@ shinyServer(function(input, output) {
                             switch(input$manipulate,
                                    "No Transformation" = fred.data(),
                                    "Change" = fred.data() %>% chg,
-                                   "Percent Change" = fred.data() %>% pch,
+                                   "Percent Change" = fred.data() %>% pch
                                    )   
                             })
-    
+    output$debug <- renderText(
+      fred.data() %>% class
+    )
     
 ######################
     # The next function takes the final time series and scales it
@@ -105,7 +111,9 @@ shinyServer(function(input, output) {
     
     output$text <- renderPrint({
       
-      ets.forecast()$model$method
+      ets.forecast()$model$method %>% 
+        as.character %>% 
+        cat
                                     
       })
     
@@ -113,7 +121,17 @@ shinyServer(function(input, output) {
     
     output$text2 <- renderPrint({
       
-      ets.forecast()$model$par
+      modelPar <-  ets.forecast()$model$par[names(ets.forecast()$model$par) %in% c("alpha", "beta")]
+      
+      names(modelPar) <- gsub(pattern = "alpha", replacement = "alpha (level)", x = names(modelPar))
+      
+      names(modelPar) <- gsub(pattern = "beta", replacement = "beta (slope)", x = names(modelPar))
+      
+      nrow.val <- nrow(ets.forecast()$model$states)
+      
+      final.states <-  ets.forecast()$model$states[nrow.val, ]
+      
+      c(modelPar, final.states)
       
     })
     
@@ -138,10 +156,9 @@ shinyServer(function(input, output) {
              when this message disappears your forecast is on its way.")
       )
       
-#       forecast.df <- forecast.frame(ets.forecast())
-#       forecast.df
+      forecast.df <- forecast.frame(ets.forecast())
+      forecast.df
       
-      forecast.frame(ets.forecast(), fred.final(), input$horizon)
       
     })
     
@@ -157,25 +174,12 @@ shinyServer(function(input, output) {
            When this message disappears your forecast is on its way.")
     )
      
-    
-    forecast.df <- forecast.plot.frame(ets.forecast(), fred.final(), input$horizon)
-    
-                                              
+      plot.dat <- forecastPlotData(ets.forecast(), fred.final())
+      
+      forecastPlot(plot.dat, span.val = input$smooth, input.date = input$date)
      
-    if(input$manipulate == "Percent Change") {
-            
-       plot.data <- past.data(ets.data = ets.forecast(),  fred.data = fred.final(), out.length = length(fred.final()), startSpot = 2)
-                                            
-    } else {
-      plot.data <- past.data(ets.data = ets.forecast(), fred.data = fred.final(), out.length = length(fred.final()))
-      }
-    
-    ggforecast(plot.data, forecast.df, input$smooth, input$date)
     
  })
-   
-  
-  
   }
 )
 

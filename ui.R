@@ -2,6 +2,7 @@ library(shiny)
 library(forecast)
 library(ggplot2)
 library(fImport)
+source("helper.r")
 
 shinyUI(fluidPage(
   
@@ -29,7 +30,7 @@ shinyUI(fluidPage(
       ),
       
       selectInput("state", label = h4("State"),
-                  choices = states,
+                  choices = stateList,
                   selected = "Alabama"),
       
       actionButton("getData", "Forecast"),
@@ -44,11 +45,10 @@ shinyUI(fluidPage(
       
       selectInput("scalefactor", 
                   label = h4("Scale Factor"), 
-                  c("No Change" = 1,
-                    "Thousands" = 1000,
-                    "Millions" = 1000000,
-                    "Billions" = 1000000000),
-                  selected = "Billions"),
+                  c("Thousands" = 1,
+                    "Millions" = 1000,
+                    "Billions" = 1000000),
+                  selected = "Thousands"),
       
       sliderInput("smooth",
                   label = h4("Smoothing Parameter"),
@@ -72,12 +72,11 @@ shinyUI(fluidPage(
         tabsetPanel(
           tabPanel("Forecast Graph", h5(plotOutput("plot"))),
           tabPanel("Model",
-                   helpText(h5("Method")),
+                   helpText(h5("ETS Model")),
                    h2(verbatimTextOutput("text")),
-                   helpText(h5("Smooth Parameters")),
-                   h2(verbatimTextOutput("text2")),
-                   helpText(h5("Model")),
-                   h2(verbatimTextOutput("text3"))),
+                   helpText(h5("ETS Transition Equation:")),
+                   helpText(h5("Smoothing Constants and Estimated Parameters")),
+                   h2(verbatimTextOutput("text2"))),
           tabPanel("Forecasts",
                    helpText(h5("Forecasted Values")),
                    h5(tableOutput("table")))
