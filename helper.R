@@ -24,6 +24,26 @@ pch <- function(tsData) {
     na.omit
 }
 
+# future data frame assembly function 
+# this version of the function works best for displaying
+# the data in a table format
+# the next function is exactly the same except that
+# as.character portion of the first item in the data frame is left off
+###########################
+
+forecast.frame <- function(ets.data){
+  framed <- data.frame(as.character(as.Date(time(ets.data$mean))),
+                       ets.data$mean,
+                       ets.data$lower[,2],
+                       ets.data$lower[, 1],
+                       ets.data$upper[, 1],
+                       ets.data$upper[, 2])
+  names(framed) <- c('Date', 'forecast', 'lower95', 'lower80', 
+                     'upper80', 'upper95')
+  return(framed)
+}
+
+
 
 # ---------------------------- New Plot method
 
@@ -66,7 +86,9 @@ forecastPlot <- function(plotData, span.val, input.date) {
                                           ymin = -Inf , ymax = +Inf ) , fill = 'grey65', alpha = 0.4 ) +
     geom_smooth ( aes ( x = Date, y = Indicator ) , method = "loess" , span = span.val,
                   size = .65 , color = "black" , fill = "springgreen4" ) +
-    labs(y = "")
+    labs(y = "") +
+    scale_x_date(limits = as.Date(c(plotData$Date[1], plotData$Date[nrow(plotData)])))
+    
   
 }
 
